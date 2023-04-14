@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="style.css">
+
+  <title>home</title>
+</head>
+
+<body>
+  <form action="/register" method="POST">
+
+    <label for="first-name">First Name:</label>
+    <input type="text" id="first-name" name="first_name" required>
+
+    <label for="last-name">Last Name:</label>
+    <input type="text" id="last-name" name="last_name" required>
+
+    <label for="email">Email:</label>
+    <input type="email" id="email" name="email" required>
+
+    <label for="country">Country:</label>
+    <select id="country" name="country" value="Select Country" required>
+      <option value="">Select Country</option>
+      <script>
+        // to get element from the database
+        fetch('http://localhost:8000/api/countries')
+          .then((res) => {
+            return res.json();
+          })
+          .then(data => {
+            // to map the result getting from the Country 
+            data.map((element) => {
+              const node = document.createElement("option");
+              node.innerHTML=element.name;
+              node.value=element.name;
+
+              document.getElementById("country").appendChild(node);
+            })
+          });
+      </script>
+    </select>
+
+    <label for="state">State:</label>
+    <select id="state" name="state" value="Select State" required>
+      <option value="">Select State</option>
+      
+      <script>
+        document.getElementById('country').addEventListener('change',()=>{
+          const country = document.getElementById('country').value;
+          // to get the id of the country by putting the name of the country 
+           fetch(`http://localhost:8000/api/countries/${country}`).then((res) => res.json()).then(data => {
+            data.map(el =>{     
+              // to get the list of the state refrenced with country id 
+              fetch(`http://localhost:8000/api/states/${el._id}`)
+              .then((res) => {
+                  return res.json();
+                })
+                .then(data => {
+                  // to remove the element previously availble in option 
+                  for(i =0;document.getElementById('state-option')!= null;i++)
+                        document.getElementById('state-option').remove();
+                    data.map((state) => {
+                      // to map the element in the option
+                        const node = document.createElement("option");
+                        node.innerHTML=state.name;
+                        node.value=state.name;
+                        node.id = "state-option"
+                        document.getElementById("state").appendChild(node);
+                    })
+                    });
+                  })
+                 });
+        })
+      </script>
+
+    </select>
+
+    <label for="city">City:</label>
+    <select id="city" name="city" value="Select City" required>
+      <option value="">-- Select City --</option>
+      <script>
+        document.getElementById('state').addEventListener('change',()=>{
+          const state = document.getElementById('state').value;
+          // console.log(state)
+          // to get the data of the state by using their name
+           fetch(`http://localhost:8000/api/states/name/${state}`).then((res) => res.json()).then(data => {
+            data.map(el =>{      
+              fetch(`http://localhost:8000/api/cities/${el._id}`)
+              .then((res) => {
+                  return res.json();
+                })
+                .then(data => {
+                  for(i = 0;document.getElementById('city-option')!= null;i++)
+                        document.getElementById('city-option').remove();
+                      data.map((city) => {
+                        const node = document.createElement("option");
+                        node.innerHTML=city.name;
+                        node.value=city.name;
+                        node.id = "city-option"
+                        document.getElementById("city").appendChild(node);
+                        // console.log(state);
+                    })
+                    });
+                  })
+                 });
+        })
+      </script>
+    </select>
+
+    <label for="gender" id="gender">Gender:</label>
+    <label><input type="radio" name="gender" value="male" required> Male</label>
+    <label><input type="radio" name="gender" value="female" required> Female</label>
+    <label><input type="radio" name="gender" value="other" required> Other</label>
+
+    <label for="dob">Date of Birth:</label>
+    <input type="date" id="dob" name="dob" max="2009-04-05" required>
+    <script>
+        const today = new Date();
+          const maxDate = new Date(today);
+          maxDate.setFullYear(today.getFullYear() - 14);
+          const dateInput = document.getElementById('dob');
+          dateInput.setAttribute('max', maxDate.toISOString().split('T')[0]);
+
+    </script>
+    <label for="age">Age:</label>
+    <input type="number" id="age" name="age" value="0" required>
+    <script>
+      document.getElementById('dob').addEventListener('change',()=>{
+        const dobInput = document.getElementById("dob");
+        const dob = new Date(dobInput.value);
+        const diffTime = Math.abs(Date.now() - dob.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); // convert to days
+        const Age = Math.floor(diffDays / 365);
+        const age = document.getElementById("age");
+        age.value =Age
+      })
+    </script>
+
+    <button type="submit" id="submit">Submit</button>
+  </form>
+  <!-- <script type="text/javascript" src="./../public/dropdown.js"></script> -->
+</body>
+
+</html>
